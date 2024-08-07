@@ -39,7 +39,7 @@ jobs:
           KO_DOCKER_REPO: docker.io/saiyam911  # Update with your Docker Hub namespace
           KO_DEFAULTBASEIMAGE: docker.io/saiyam911/devops-baseimage:prod-v1  # Update base image if needed
         run: |
-          ko build --bare -t kubesimplify-demo:sha-${{ env.sha_short }}
+          ko build --bare -t docker.io/saiyam911/kubesimplify-demo:prod
           
       - name: Generate deploy manifest from Jinja template
         uses: cuchi/jinja2-action@v1.1.0
