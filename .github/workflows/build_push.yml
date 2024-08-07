@@ -39,7 +39,7 @@ jobs:
           KO_DOCKER_REPO: docker.io/saiyam911
           KO_DEFAULTBASEIMAGE: docker.io/saiyam911/devops-baseimage:prod-v1
         run: |
-          ko build -t sha-${{ env.sha_short }}
+          ko build --bare -t sha-${{ env.sha_short }}
           
       - name: Generate deploy manifest from Jinja template
         uses: cuchi/jinja2-action@v1.1.0
