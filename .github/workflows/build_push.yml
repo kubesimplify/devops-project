@@ -36,7 +36,7 @@ jobs:
       - name: Build and Publish with ko
         env:
           KO_DATA_PATH: kodata/
-          KO_DOCKER_REPO: docker.io/saiyam911
+          KO_DOCKER_REPO: docker.io/saiyam911/devops-project
           KO_DEFAULTBASEIMAGE: docker.io/saiyam911/devops-baseimage:prod-v1
         run: |
           ko build --bare -t sha-${{ env.sha_short }}
