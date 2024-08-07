@@ -1,0 +1,77 @@
+name: Build and Publish with ko
+
+on:
+  push:
+    branches: ['main']
+
+jobs:
+  release-ko:
+    name: Release with ko
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.20.x'
+
+      - name: Set up ko
+        uses: ko-build/setup-ko@v0.6
+        with:
+          version: v0.14.1  # Specify the version of ko if needed
+
+      - name: Log in to Docker Hub
+        env:
+          KO_DOCKER_REPO: docker.io/saiyam911  # Update with your Docker Hub namespace
+        run: |
+          echo "${{ secrets.DOCKER_PASSWORD }}" | ko login docker.io --username ${{ secrets.DOCKER_USERNAME }} --password-stdin
+
+      - name: Get git SHA short
+        id: vars
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+
+      - name: Build and Publish with ko
+        env:
+          KO_DATA_PATH: kodata/
+          KO_DOCKER_REPO: docker.io/saiyam911  # Update with your Docker Hub namespace
+          KO_DEFAULTBASEIMAGE: ttl.sh/devops-baseimage:prod-v1  # Update base image if needed
+        run: |
+          ko build --bare -B . -t saiyam911/kubesimplify-demo:sha-${{ env.sha_short }}
+          
+      - name: Generate deploy manifest from Jinja template
+        uses: cuchi/jinja2-action@v1.1.0
+        with: 
+          template: tmpl/deploy.j2
+          output_file: deploy/deploy.yaml
+          strict: true
+          variables: |
+            image_deploy_tag=sha-${{ env.sha_short }}
+            
+      - name: Configure git for the action
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          
+      - name: Stash unstaged changes
+        run: git stash --include-untracked
+        
+      - name: Pull latest changes from the remote branch
+        run: git pull origin main --rebase
+        
+      - name: Apply stashed changes
+        run: git stash pop || echo "No stashed changes to apply"
+
+      - name: Commit deploy manifest on local repo
+        run: |
+          git add app/deploy/deploy.yaml
+          git commit -s -m "[skip ci] Generate deployment manifests"
+          
+      - name: Push deploy manifests to remote repo
+        uses: ad-m/github-push-action@v0.6.0
+        with: 
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: main
+
