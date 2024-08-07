@@ -5,7 +5,7 @@ packages {
 }
 
 oci "pkgs" {
-  name          = "ttl.sh/devops-baseimage"
+  name          = "docker.io/saiyam911/devops-baseimage"
   cmd           = []
   entrypoint    = []
   envVars       = []
