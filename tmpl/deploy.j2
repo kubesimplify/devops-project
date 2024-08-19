@@ -2,8 +2,10 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: my-app
+  labels:
+    app: my-app
 spec:
-  replicas: 1
+  replicas: 3 
   selector:
     matchLabels:
       app: my-app
@@ -59,76 +61,59 @@ apiVersion: v1
 kind: Service
 metadata:
   name: my-app-service
+  labels:
+    app: my-app
 spec:
   selector:
     app: my-app
   ports:
     - protocol: TCP
       port: 80
-      targetPort: 8080  
+      targetPort: 8080
+  type: ClusterIP
 ---
-apiVersion: cert-manager.io/v1
-kind: ClusterIssuer
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: Gateway
 metadata:
-  name: production-app
-spec:
-  acme:
-    # The ACME server URL
-    server: https://acme-v02.api.letsencrypt.org/directory
-    # Email address used for ACME registration
-    email: demo@v1.com
-    # Name of a secret used to store the ACME account private key
-    privateKeySecretRef:
-      name: app 
-    # Enable the HTTP-01 challenge provider
-    solvers:
-    - http01:
-        ingress:
-          class: nginx 
----
-apiVersion: cert-manager.io/v1
-kind: Certificate
-metadata:
-  name: app
-spec:
-  secretName: app
-  issuerRef:
-    name: production-app
-    kind: ClusterIssuer
-  commonName: demo.kubesimplify.com
-  dnsNames:
-  - demo.kubesimplify.com 
----
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: my-app-ingress
+  name: app-gateway
   annotations:
-    cert-manager.io/cluster-issuer: production-app
-
+    cert-manager.io/cluster-issuer: letsencrypt-prod
 spec:
-  ingressClassName: nginx
-  rules:
-  - host: demo.kubesimplify.com
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: my-app-service
-            port:
-              number: 80
-  tls:
-  - hosts:
-    - demo.kubesimplify.com
-    secretName: app
+  gatewayClassName: nginx
+  listeners:
+  - name: http
+    port: 80
+    protocol: HTTP
+    hostname: "*.kubesimplify.com"
+  - name: https
+    hostname: "*.kubesimplify.com"
+    port: 443
+    protocol: HTTPS
+    allowedRoutes:
+      namespaces:
+        from: All
+    tls:
+      mode: Terminate
+      certificateRefs:
+      - name: app-kubesimplify-com-tls
+        kind: Secret
+        group: core
 ---
-apiVersion: v1
-kind: Secret
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: HTTPRoute
 metadata:
-  name: postgresql-credentials
-type: Opaque
-data:
-  password: bmV3X3Bhc3N3b3Jk
-  username: Z29hbHNfdXNlcg==
+  name: go-app-route
+spec:
+  parentRefs:
+  - name: app-gateway
+    namespace: default
+  hostnames:
+  - "app.kubesimplify.com"
+  rules:
+  - matches:
+    - path:
+        type: Exact
+        value: /
+    backendRefs:
+    - name: my-app-service
+      port: 80
