@@ -1,0 +1,45 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: app-gateway
+  namespace: default
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  gatewayClassName: nginx
+  listeners:
+  - name: http
+    port: 80
+    protocol: HTTP
+    hostname: "app.kubesimplify.com"
+  - name: https
+    hostname: "app.kubesimplify.com"
+    port: 443
+    protocol: HTTPS
+    allowedRoutes:
+      namespaces:
+        from: All
+    tls:
+      mode: Terminate
+      certificateRefs:
+      - name: app-kubesimplify-com-tls
+        kind: Secret
+        group: ""
+  - name: argo-http
+    port: 80
+    protocol: HTTP
+    hostname: "argo.kubesimplify.com"
+  - name: argo-https
+    hostname: "argo.kubesimplify.com"
+    port: 443
+    protocol: HTTPS
+    allowedRoutes:
+      namespaces:
+        from: All
+    tls:
+      mode: Terminate
+      certificateRefs:
+      - name: argo-kubesimplify-com-tls
+        kind: Secret
+        group: ""
+

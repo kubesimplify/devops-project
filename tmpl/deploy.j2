@@ -68,11 +68,12 @@ spec:
     app: my-app
   ports:
     - protocol: TCP
+      name: http
       port: 80
       targetPort: 8080
   type: ClusterIP
 ---
-apiVersion: gateway.networking.k8s.io/v1beta1
+apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
   name: app-gateway
@@ -84,9 +85,9 @@ spec:
   - name: http
     port: 80
     protocol: HTTP
-    hostname: "*.kubesimplify.com"
+    hostname: "app.kubesimplify.com"
   - name: https
-    hostname: "*.kubesimplify.com"
+    hostname: "app.kubesimplify.com"
     port: 443
     protocol: HTTPS
     allowedRoutes:
@@ -96,8 +97,9 @@ spec:
       mode: Terminate
       certificateRefs:
       - name: app-kubesimplify-com-tls
-        kind: Secret
-        group: core
+        kind: Secret  
+        group: ""
+
 ---
 apiVersion: gateway.networking.k8s.io/v1beta1
 kind: HTTPRoute
@@ -112,7 +114,7 @@ spec:
   rules:
   - matches:
     - path:
-        type: Exact
+        type: PathPrefix
         value: /
     backendRefs:
     - name: my-app-service

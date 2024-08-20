@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: my-app
-        image: saiyam911/kubesimplify-demo:sha-60fce6c
+        image: saiyam911/devops-project:v1
         imagePullPolicy: Always
         env:
         - name: DB_USERNAME
@@ -68,6 +68,7 @@ spec:
     app: my-app
   ports:
     - protocol: TCP
+      name: http
       port: 80
       targetPort: 8080
   type: ClusterIP
@@ -84,9 +85,9 @@ spec:
   - name: http
     port: 80
     protocol: HTTP
-    hostname: "*.kubesimplify.com"
+    hostname: "app.kubesimplify.com"
   - name: https
-    hostname: "*.kubesimplify.com"
+    hostname: "app.kubesimplify.com"
     port: 443
     protocol: HTTPS
     allowedRoutes:
@@ -97,7 +98,7 @@ spec:
       certificateRefs:
       - name: app-kubesimplify-com-tls
         kind: Secret
-        group: core
+        group: ""
 ---
 apiVersion: gateway.networking.k8s.io/v1beta1
 kind: HTTPRoute
@@ -112,7 +113,7 @@ spec:
   rules:
   - matches:
     - path:
-        type: Exact
+        type: PathPrefix
         value: /
     backendRefs:
     - name: my-app-service

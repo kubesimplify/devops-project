@@ -1,0 +1,20 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: my-app-service-monitor
+  namespace: monitoring  # Ensure this is in the namespace where Prometheus is running
+  labels:
+    release: kube-prometheus-stack
+spec:
+  selector:
+    matchLabels:
+      app: my-app  # This must match the label on your service
+  namespaceSelector:
+    matchNames:
+    - default  # The namespace where your service is running
+  endpoints:
+  - port: "http"  # Port where the service is exposing metrics (as a string)
+    path: /metrics  # The path where your application exposes Prometheus metrics
+    interval: 15s  # Scrape interval
+    scheme: http  # Protocol to use for scraping
+
