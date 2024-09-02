@@ -129,7 +129,7 @@ data:
 EOF
 ```
 
-```
+
 ### Application deployment(Currently this has the gateway for both Argocd and the application)
 ```
 kubectl apply -f deploy/deploy,yaml
