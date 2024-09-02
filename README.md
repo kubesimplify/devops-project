@@ -1,6 +1,11 @@
+This repo is for the video below 
+[![Conplete DevOps Project](https://img.youtube.com/vi/kCWAwXFnYic/0.jpg)](https://www.youtube.com/watch?v=kCWAwXFnYic)
+
 # Running Locally 
 ## Initialising for base image
-bsf init 
+```
+bsf init
+``` 
 ## Building OCI artifact using bsf and ko
 ```
 bsf oci pkgs --platform=linux/amd64 --tag=prod-v1 --push --dest-creds {Dockerhub username}:{dockerhub password}
@@ -29,13 +34,13 @@ docker run -d \
 ```
 
 ## Cluster creatiom 
-ksctl create-cluster azure --name=application --version=1.29
+```ksctl create-cluster azure --name=application --version=1.29```
 
 ## Switching the KubeConfig file 
-ksctl switch-cluster --provider azure --region eastus --name devops-project
+```ksctl switch-cluster --provider azure --region eastus --name devops-project```
 
 ## Exporting Kubeconfig
-export KUBECONFIG="/Users/saiyam/.ksctl/kubeconfig"                     
+```export KUBECONFIG="/Users/saiyam/.ksctl/kubeconfig"```              
 
 ## Installing basic componenets cert manager, nginx fabric for gateway API, Prometheus. for monitoring and Grafana for visualization. 
 ### Cert manager
@@ -46,7 +51,7 @@ Edit cert-manager deployment
 ```
 - --enable-gateway-api
 ```
-`kubectl rollout restart deployment cert-manager -n cert-manager`
+```kubectl rollout restart deployment cert-manager -n cert-manager```
 
 ### Install Kube prometheus stack
 ```
