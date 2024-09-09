@@ -141,7 +141,7 @@ kubectl apply -f deploy/deploy,yaml
 ```
 kubectl create namespace argocd
 kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
-kubectl patch configmap argocd-cm -n argocd --patch '{"data":{"server.insecure":"true"}}'
+kubectl patch configmap argocd-cmd-params-cm  -n argocd --patch '{"data":{"server.insecure":"true"}}'
 kubectl rollout restart deployment argocd-server -n argocd
 kubectl get secret --namespace argocd argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 --decode ; echo 
 ```
