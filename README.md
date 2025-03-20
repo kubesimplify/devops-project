@@ -134,7 +134,7 @@ EOF
 
 ### Application deployment(Currently this has the gateway for both Argocd and the application)
 ```
-kubectl apply -f deploy/deploy,yaml
+kubectl apply -f deploy/deploy.yaml
 ```
 
 ## Argocd installation 
